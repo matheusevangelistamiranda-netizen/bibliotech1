@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Reservas · BiblioTech{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div><span class="eyebrow">FILA DE ESPERA</span><h1>Reservas aguardando</h1><p>Atenda as reservas na ordem de entrada quando houver um exemplar disponível.</p></div>
+  <a class="botao botao-secundario" href="{{ url_for('livros') }}">Explorar catálogo</a>
+</section>
+<section class="panel-section">
+  {% if reservas %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Livro</th><th>Leitor</th><th>Data da reserva</th><th>Disponibilidade</th><th>Atender</th><th></th></tr></thead>
+      <tbody>
+      {% for r in reservas %}
+      <tr>
+        <td><a class="table-book" href="{{ url_for('detalhe_livro', id_livro=r.id_livro) }}">{{ r.titulo }}</a></td>
+        <td>{{ r.nome }}</td>
+        <td>{{ r.data_reserva.strftime('%d/%m/%Y %H:%M') if r.data_reserva else '—' }}</td>
+        <td><span class="pill {{ 'pill-available' if r.disponiveis else 'pill-waiting' }}">{{ r.disponiveis }} disponível(is)</span></td>
+        <td>
+          {% if r.disponiveis %}
+          <form method="post" action="{{ url_for('atender_reserva', id_reserva=r.id_reserva) }}" class="reservation-action">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label class="sr-only" for="exemplar-{{ r.id_reserva }}">Exemplar para {{ r.nome }}</label>
+            <select id="exemplar-{{ r.id_reserva }}" name="id_exemplar" required>
+              <option value="">Escolher exemplar</option>
+              {% for ex in exemplares %}{% if ex.id_livro == r.id_livro %}<option value="{{ ex.id_exemplar }}">#{{ ex.id_exemplar }}</option>{% endif %}{% endfor %}
+            </select>
+            <button class="botao botao-small" type="submit">Atender</button>
+          </form>
+          {% else %}<span class="texto-suave">Aguardando devolução</span>{% endif %}
+        </td>
+        <td><form method="post" action="{{ url_for('cancelar_reserva', id_reserva=r.id_reserva) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="botao-texto perigo" type="submit">Cancelar</button></form></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><span class="empty-icon">⌕</span><h2>A fila está vazia</h2><p>Quando um livro indisponível for reservado, ele aparecerá aqui.</p><a class="botao" href="{{ url_for('livros') }}">Ir ao catálogo</a></div>
+  {% endif %}
+</section>
+{% endblock %}

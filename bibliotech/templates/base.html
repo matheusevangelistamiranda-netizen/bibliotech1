@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0F3D3E">
+  <title>{% block title %}BiblioTech{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo-simbolo.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="top-strip">
+    <span>Sistema de gerenciamento de biblioteca</span>
+    <div class="conta-atual">
+      <span class="avatar-avatar">{{ iniciais(nome_bibliotecario or 'Bibliotecário') }}</span>
+      <span class="nome-conta">{{ nome_bibliotecario }}</span>
+      {% if bibliotecario_admin %}<a class="link-equipe" href="{{ url_for('equipe') }}">Equipe</a>{% endif %}
+      <form method="post" action="{{ url_for('logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="botao-sair" type="submit">Sair</button>
+      </form>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <a class="marca-horizontal" href="{{ url_for('index') }}" aria-label="BiblioTech - início">
+      <img src="{{ url_for('static', filename='img/logo-simbolo.svg') }}" alt="">
+      <span class="marca-palavras"><span class="marca-nome"><span>Biblio</span><em>tech</em></span><small>LIVRARIA</small></span>
+    </a>
+
+    <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-controls="navegacao-principal" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+
+    <nav class="navegacao-principal" id="navegacao-principal" aria-label="Navegação principal">
+      <a class="{{ 'ativo' if request.endpoint == 'index' }}" href="{{ url_for('index') }}">Painel</a>
+      <a class="{{ 'ativo' if request.endpoint in ['livros', 'novo_livro', 'editar_livro', 'detalhe_livro'] }}" href="{{ url_for('livros') }}">Catálogo</a>
+      <a class="{{ 'ativo' if request.endpoint in ['leitores', 'novo_leitor', 'editar_leitor'] }}" href="{{ url_for('leitores') }}">Leitores</a>
+      <a class="{{ 'ativo' if request.endpoint in ['emprestimos', 'emprestar', 'devolver'] }}" href="{{ url_for('emprestimos') }}">Empréstimos</a>
+      <a class="{{ 'ativo' if request.endpoint == 'historico' }}" href="{{ url_for('historico') }}">Histórico</a>
+      <a class="nav-reservas {{ 'ativo' if request.endpoint in ['reservas', 'reservar_livro', 'atender_reserva'] }}" href="{{ url_for('reservas') }}">Reservas</a>
+    </nav>
+
+    <form class="busca-global" method="get" action="{{ url_for('busca_global') }}" role="search">
+      <label class="sr-only" for="busca-global">Buscar livro, autor ou leitor</label>
+      <input id="busca-global" type="search" name="q" placeholder="Buscar livro, autor ou leitor">
+      <button type="submit" aria-label="Buscar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg>
+      </button>
+    </form>
+
+    <a class="botao botao-emprestimo" href="{{ url_for('emprestimos') }}">Novo empréstimo</a>
+  </header>
+
+  <main class="content-shell">
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% for tipo, texto in mensagens %}
+        <p class="aviso {{ tipo }}" role="status">{{ texto }}</p>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="rodape"><span>BiblioTech</span><span>·</span><span>Sistema de gerenciamento de biblioteca</span></footer>
+
+  <script>
+    const menuToggle = document.querySelector('.menu-toggle');
+    const mainNavigation = document.querySelector('#navegacao-principal');
+    if (menuToggle && mainNavigation) {
+      menuToggle.addEventListener('click', () => {
+        const aberto = menuToggle.getAttribute('aria-expanded') === 'true';
+        menuToggle.setAttribute('aria-expanded', String(!aberto));
+        menuToggle.setAttribute('aria-label', aberto ? 'Abrir menu' : 'Fechar menu');
+        mainNavigation.classList.toggle('aberto', !aberto);
+      });
+    }
+
+    document.querySelectorAll('[data-carousel-scroll]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const carousel = document.getElementById(button.dataset.carouselScroll);
+        if (carousel) {
+          carousel.scrollBy({ left: Number(button.dataset.scrollDirection) * 260, behavior: 'smooth' });
+        }
+      });
+    });
+
+    document.querySelectorAll('.capa-externa').forEach((image) => {
+      image.addEventListener('error', () => {
+        image.hidden = true;
+        if (image.nextElementSibling) image.nextElementSibling.hidden = false;
+      }, { once: true });
+    });
+  </script>
+</body>
+</html>

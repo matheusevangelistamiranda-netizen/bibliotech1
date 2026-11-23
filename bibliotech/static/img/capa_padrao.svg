@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-labelledby="title desc">
+  <title id="title">Capa padrão BiblioTech</title>
+  <desc id="desc">Ilustração abstrata em tons de verde com o símbolo de um livro.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e6f3ee"/>
+      <stop offset="1" stop-color="#bdd8cd"/>
+    </linearGradient>
+    <linearGradient id="book" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2c8272"/>
+      <stop offset="1" stop-color="#155b50"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#background)"/>
+  <circle cx="330" cy="90" r="115" fill="#fff" opacity=".22"/>
+  <circle cx="42" cy="520" r="140" fill="#fff" opacity=".2"/>
+  <g transform="translate(82 180)">
+    <path d="M22 18c55-19 108-8 118 1v177c-28-19-83-19-118-1z" fill="#f8fcfa"/>
+    <path d="M140 19c27-18 83-20 118-1v177c-41-17-87-17-118 1z" fill="#eaf5f0"/>
+    <path d="M140 20v176" fill="none" stroke="#92b9aa" stroke-width="4"/>
+    <path d="M46 63c24-7 48-7 70 0M46 90c24-7 48-7 70 0M46 117c24-7 48-7 70 0M165 63c24-7 49-7 72 0M165 90c24-7 49-7 72 0M165 117c24-7 49-7 72 0" fill="none" stroke="#9bbcaf" stroke-linecap="round" stroke-width="5"/>
+  </g>
+  <text x="200" y="455" fill="#285f54" font-family="Georgia,serif" font-size="31" font-weight="bold" text-anchor="middle">BiblioTech</text>
+  <text x="200" y="485" fill="#537b70" font-family="Arial,sans-serif" font-size="11" font-weight="bold" letter-spacing="3" text-anchor="middle">CADA LIVRO, UMA DESCOBERTA</text>
+</svg>

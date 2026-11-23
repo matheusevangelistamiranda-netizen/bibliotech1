@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Catálogo · BiblioTech{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div><span class="eyebrow">ACERVO COMPLETO</span><h1>Catálogo</h1><p>Descubra uma nova história entre {{ total }} {{ 'obra' if total == 1 else 'obras' }}.</p></div>
+  <a class="botao" href="{{ url_for('novo_livro') }}">Adicionar livro</a>
+</section>
+
+<section class="catalog-panel">
+  <nav class="category-chips" aria-label="Filtrar por categoria">
+    <a class="{{ 'selecionada' if not filtros.categoria }}" href="{{ url_for('livros', q=filtros.q, ordem=filtros.ordem) }}">Todas as categorias</a>
+    {% for c in categorias %}
+    <a class="{{ 'selecionada' if filtros.categoria == c.categoria }}" href="{{ url_for('livros', categoria=c.categoria, q=filtros.q, ordem=filtros.ordem) }}">{{ c.categoria }}</a>
+    {% endfor %}
+  </nav>
+  <form class="catalog-filters" method="get" action="{{ url_for('livros') }}">
+    <label class="catalog-search"><span class="sr-only">Buscar livros</span><input type="search" name="q" value="{{ filtros.q }}" placeholder="Título, autor, ISBN ou editora"></label>
+    <input type="hidden" name="categoria" value="{{ filtros.categoria }}">
+    <select name="autor" aria-label="Filtrar por autor"><option value="">Todos os autores</option>{% for a in autores %}<option value="{{ a.id_autor }}" {{ 'selected' if filtros.autor|string == a.id_autor|string }}>{{ a.nome }}</option>{% endfor %}</select>
+    <select name="disponibilidade" aria-label="Filtrar disponibilidade"><option value="">Qualquer situação</option><option value="disponivel" {{ 'selected' if filtros.disponibilidade == 'disponivel' }}>Disponíveis</option><option value="indisponivel" {{ 'selected' if filtros.disponibilidade == 'indisponivel' }}>Indisponíveis</option></select>
+    <label><span class="sr-only">Ano de publicação</span><input class="year-filter" type="number" name="ano" value="{{ filtros.ano }}" placeholder="Ano"></label>
+    <select name="ordem" aria-label="Ordenar catálogo"><option value="titulo" {{ 'selected' if filtros.ordem == 'titulo' }}>Nome A–Z</option><option value="titulo_desc" {{ 'selected' if filtros.ordem == 'titulo_desc' }}>Nome Z–A</option><option value="ano" {{ 'selected' if filtros.ordem == 'ano' }}>Mais recentes</option><option value="ano_asc" {{ 'selected' if filtros.ordem == 'ano_asc' }}>Mais antigos</option></select>
+    <button class="botao botao-secondary" type="submit">Aplicar filtros</button>
+  </form>
+
+  {% if livros %}
+  <div class="catalog-grid">
+    {% for livro in livros %}
+    <article class="catalog-card">
+      <a class="catalog-cover" href="{{ url_for('detalhe_livro', id_livro=livro.id_livro) }}" aria-label="Ver {{ livro.titulo }}">
+        {% if livro.capa_url %}<img class="capa-externa" src="{{ livro.capa_url }}" alt="Capa de {{ livro.titulo }}" loading="lazy"><div class="cover-placeholder" hidden>{{ livro.titulo }}</div>{% else %}<div class="cover-placeholder">{{ livro.titulo }}</div>{% endif %}
+        <span class="cover-label">{{ livro.categoria or 'ACERVO' }}</span>
+      </a>
+      <div class="catalog-info">
+        <span class="category-label">{{ livro.ano_publicacao or 'Ano não informado' }}</span>
+        <h2><a href="{{ url_for('detalhe_livro', id_livro=livro.id_livro) }}">{{ livro.titulo }}</a></h2>
+        <p>{{ livro.autores or 'Autor não informado' }}</p>
+        <span class="pill {{ 'pill-available' if livro.disponiveis else 'pill-waiting' }}">{{ livro.disponiveis }} de {{ livro.total }} disponíveis</span>
+      </div>
+      {% if livro.disponiveis %}
+      <a class="botao botao-card" href="{{ url_for('emprestimos', id_livro=livro.id_livro) }}">Emprestar</a>
+      {% else %}
+      <a class="botao botao-card botao-reservar" href="{{ url_for('reservar_livro', id_livro=livro.id_livro) }}">Reservar</a>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  <nav class="pagination" aria-label="Paginação do catálogo">
+    {% if pagina > 1 %}<a href="{{ url_for('livros', pagina=pagina-1, **filtros) }}">← Anterior</a>{% else %}<span class="desativado">← Anterior</span>{% endif %}
+    <span>Página {{ pagina }} de {{ total_paginas }}</span>
+    {% if pagina < total_paginas %}<a href="{{ url_for('livros', pagina=pagina+1, **filtros) }}">Próxima →</a>{% else %}<span class="desativado">Próxima →</span>{% endif %}
+  </nav>
+  {% else %}
+  <div class="empty-state"><span class="empty-icon">⌕</span><h2>Nenhuma obra encontrada</h2><p>Tente ajustar os filtros ou cadastre uma nova obra.</p><a class="botao" href="{{ url_for('novo_livro') }}">Adicionar livro</a></div>
+  {% endif %}
+</section>
+{% endblock %}

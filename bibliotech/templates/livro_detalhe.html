@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ livro.titulo }} · BiblioTech{% endblock %}
+{% block content %}
+<section class="page-heading detail-heading">
+  <div><span class="eyebrow"><a href="{{ url_for('livros') }}">CATÁLOGO</a> / DETALHES</span><h1>{{ livro.titulo }}</h1></div>
+  <a class="botao botao-secondary" href="{{ url_for('livros') }}">Voltar ao catálogo</a>
+</section>
+<section class="panel-section book-detail">
+  {% set cor = '#C8553D' if livro.categoria == 'Mangá' else '#E8A33D' if livro.categoria == 'Livro' else '#557E83' %}
+  <div class="detail-cover">
+    {% if livro.capa_url %}<img class="capa-externa" src="{{ livro.capa_url }}" alt="Capa de {{ livro.titulo }}"><div class="cover-placeholder" style="--cover-accent: {{ cor }}" hidden>{{ livro.titulo }}</div>{% else %}<div class="cover-placeholder" style="--cover-accent: {{ cor }}">{{ livro.titulo }}</div>{% endif %}
+  </div>
+  <div class="detail-information">
+    <span class="category-label">{{ livro.categoria or 'ACERVO' }}</span>
+    <h2>{{ livro.titulo }}</h2>
+    <p class="detail-author">{{ livro.autores or 'Autor não informado' }}</p>
+    <div class="detail-stats">
+      <div><small>PUBLICAÇÃO</small><strong>{{ livro.ano_publicacao or '—' }}</strong></div>
+      <div><small>EDITORA</small><strong>{{ livro.editora or '—' }}</strong></div>
+      <div><small>ISBN</small><strong>{{ livro.isbn or '—' }}</strong></div>
+      <div><small>DISPONIBILIDADE</small><strong>{{ livro.disponiveis }} de {{ livro.total }} exemplares</strong></div>
+    </div>
+    <h3>Sobre esta obra</h3><p class="detail-description">{{ livro.descricao or 'Nenhuma descrição foi adicionada.' }}</p>
+    <div class="detail-actions">
+      {% if livro.disponiveis %}<a class="botao" href="{{ url_for('emprestimos', id_livro=livro.id_livro) }}">Registrar empréstimo</a>
+      {% else %}<a class="botao botao-reservar" href="{{ url_for('reservar_livro', id_livro=livro.id_livro) }}">Entrar na fila de reserva</a>{% endif %}
+      <a class="botao botao-secondary" href="{{ url_for('editar_livro', id_livro=livro.id_livro) }}">Editar livro</a>
+      <form method="post" action="{{ url_for('excluir_livro', id_livro=livro.id_livro) }}" onsubmit="return confirm('Excluir este livro? Esta ação não pode ser desfeita.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="botao-texto perigo" type="submit">Excluir</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

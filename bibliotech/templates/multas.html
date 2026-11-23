@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Multas · BiblioTech{% endblock %}
+{% block content %}
+<section class="page-heading"><div><span class="eyebrow">ACOMPANHAMENTO</span><h1>Multas por atraso</h1><p>Valor calculado a R$ {{ '%.2f'|format(multa_por_dia) }} por dia de atraso.</p></div></section>
+<section class="panel-section">
+  {% if multas %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Livro</th><th>Leitor</th><th>Devolução prevista</th><th>Devolvido em</th><th>Valor</th><th>Situação</th></tr></thead>
+      <tbody>
+      {% for m in multas %}
+      <tr><td class="table-book"><strong>{{ m.titulo }}</strong></td><td>{{ m.nome }}</td><td>{{ m.data_prevista.strftime('%d/%m/%Y') if m.data_prevista else '—' }}</td><td>{{ m.data_devolucao.strftime('%d/%m/%Y') if m.data_devolucao else '—' }}</td><td><strong>R$ {{ '%.2f'|format(m.valor_atual or 0) }}</strong></td><td><span class="pill {{ 'pill-returned' if m.data_devolucao else 'pill-late' }}">{{ 'Devolvido' if m.data_devolucao else 'Em atraso' }}</span></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<div class="empty-state"><span class="empty-icon">✓</span><h2>Nenhuma multa</h2><p>Não há atrasos com multa registrada.</p></div>{% endif %}
+</section>
+{% endblock %}

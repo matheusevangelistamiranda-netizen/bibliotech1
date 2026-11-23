@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Painel · BiblioTech{% endblock %}
+{% block content %}
+{% macro cover(livro, compact=false) -%}
+  {% set cor = '#C8553D' if livro.categoria == 'Mangá' else '#E8A33D' if livro.categoria == 'Livro' else '#557E83' %}
+  <div class="cover-media {{ 'cover-compact' if compact else '' }}">
+    {% if livro.capa_url %}
+      <img class="capa-externa" src="{{ livro.capa_url }}" alt="Capa de {{ livro.titulo }}" loading="lazy">
+      <div class="cover-placeholder" style="--cover-accent: {{ cor }}" hidden><small>{{ livro.categoria or 'BIBLIOTECH' }}</small><span>{{ livro.titulo }}</span></div>
+    {% else %}
+      <div class="cover-placeholder" style="--cover-accent: {{ cor }}"><small>{{ livro.categoria or 'BIBLIOTECH' }}</small><span>{{ livro.titulo }}</span></div>
+    {% endif %}
+  </div>
+{%- endmacro %}
+
+{% macro shelf_books(livros, carrossel_id) -%}
+  {% if livros %}
+  <div class="carousel-frame">
+    <button class="carousel-arrow carousel-prev" type="button" data-carousel-scroll="{{ carrossel_id }}" data-scroll-direction="-1" aria-label="Rolar livros para a esquerda">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <div class="book-carousel" id="{{ carrossel_id }}" tabindex="0" aria-label="Livros em destaque">
+      {% for livro in livros %}
+      <article class="home-book-card">
+        <a class="home-book-cover" href="{{ url_for('detalhe_livro', id_livro=livro.id_livro) }}">{{ cover(livro) }}</a>
+        <div class="home-book-info">
+          <span class="category-label">{{ livro.categoria or 'ACERVO' }}</span>
+          <h3><a href="{{ url_for('detalhe_livro', id_livro=livro.id_livro) }}">{{ livro.titulo }}</a></h3>
+          <p>{{ livro.autores or 'Autor não informado' }}</p>
+        </div>
+        {% if livro.disponiveis > 0 %}
+          <a class="botao botao-card" href="{{ url_for('emprestimos', id_livro=livro.id_livro) }}">Emprestar</a>
+        {% else %}
+          <a class="botao botao-card botao-reservar" href="{{ url_for('reservar_livro', id_livro=livro.id_livro) }}">Reservar</a>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+    <button class="carousel-arrow carousel-next" type="button" data-carousel-scroll="{{ carrossel_id }}" data-scroll-direction="1" aria-label="Rolar livros para a direita">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
+  {% else %}
+  <div class="shelf-empty"><p>Nenhuma obra nesta estante por enquanto.</p><a href="{{ url_for('livros') }}">Explorar catálogo →</a></div>
+  {% endif %}
+{%- endmacro %}
+
+<section class="welcome-row">
+  <div><span class="eyebrow">SEU ESPAÇO DE LEITURA</span><h1>Bem-vindo à BiblioTech</h1><p>Encontre sua próxima história e acompanhe a vida da biblioteca.</p></div>
+  <a class="link-seta" href="{{ url_for('livros') }}">Explorar catálogo <span>→</span></a>
+</section>
+
+<section class="quick-actions" aria-label="Atalhos rápidos">
+  <a class="quick-card" href="{{ url_for('emprestimos') }}">
+    <span class="quick-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M8 7h8M8 10h6"/></svg></span>
+    <span><strong>Registrar empréstimo</strong><small>Registre a saída de um livro em segundos</small></span><span class="quick-arrow">→</span>
+  </a>
+  <a class="quick-card" href="{{ url_for('emprestimos') }}#emprestimos-pendentes">
+    <span class="quick-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M9 10l2 2 4-4"/></svg></span>
+    <span><strong>Registrar devolução</strong><small>Dê baixa e atualize o estoque</small></span><span class="quick-arrow">→</span>
+  </a>
+  <a class="quick-card" href="{{ url_for('novo_leitor') }}">
+    <span class="quick-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20v-1.5a6 6 0 0 1 12 0V20zM17 8h5M19.5 5.5v5"/></svg></span>
+    <span><strong>Cadastrar leitor</strong><small>Adicione novos leitores ao sistema</small></span><span class="quick-arrow">→</span>
+  </a>
+  <a class="quick-card" href="{{ url_for('multas') }}">
+    <span class="quick-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M8 2h8"/></svg></span>
+    <span><strong>Atrasos</strong><small>Veja os empréstimos que passaram do prazo</small></span><span class="quick-arrow">→</span>
+  </a>
+</section>
+
+<section class="shelves-nav" aria-labelledby="shelves-heading">
+  <div class="section-title"><div><span class="eyebrow">DESCUBRA ALGO NOVO</span><h2 id="shelves-heading">Navegar pelas estantes</h2></div><a class="link-seta" href="{{ url_for('livros') }}">Ver catálogo <span>→</span></a></div>
+  <div class="category-strip">
+    <a class="category-tile {{ 'selecionada' if not categoria_selecionada }}" href="{{ url_for('index') }}#estante-selecionada">
+      <span class="category-fan">
+        {% for livro in destaques[:3] %}<span class="fan-cover fan-{{ loop.index }}">{{ cover(livro, true) }}</span>{% endfor %}
+      </span><strong>Em destaque</strong>
+    </a>
+    {% for item in categorias %}
+    <a class="category-tile {{ 'selecionada' if categoria_selecionada == item.categoria }}" href="{{ url_for('index', categoria=item.categoria) }}#estante-selecionada">
+      <span class="category-fan">
+        {% for livro in capas_por_categoria.get(item.categoria, []) %}<span class="fan-cover fan-{{ loop.index }}">{{ cover(livro, true) }}</span>{% endfor %}
+      </span><strong>{{ item.categoria }}</strong>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="featured-shelf" id="estante-selecionada">
+  <div class="shelf-header">
+    <span class="eyebrow">SELEÇÃO DA BIBLIOTECA</span>
+    <h2>{{ categoria_selecionada or 'Em destaque' }}</h2>
+    <nav class="anchor-links" aria-label="Ir para seção">
+      <span>Ir para:</span><a href="#novidades">Novidades</a><span>·</span><a href="#mais-emprestados">Mais emprestados</a><span>·</span><a href="#classicos">Clássicos</a><span>·</span><a href="#mais-desejados">Mais desejados</a>
+    </nav>
+  </div>
+  <div class="section-title shelf-subtitle"><h3>Em alta</h3><a class="link-seta" href="{{ url_for('livros', categoria=categoria_selecionada) if categoria_selecionada else url_for('livros') }}">Ver tudo <span>→</span></a></div>
+  {{ shelf_books(destaques, 'carousel-featured') }}
+</section>
+
+<div class="summary-cards" aria-label="Resumo da biblioteca">
+  <article class="summary-card"><span class="summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20"/></svg></span><span>Livros no acervo</span><strong>{{ estatisticas.titulos }}</strong></article>
+  <article class="summary-card"><span class="summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg></span><span>Empréstimos ativos</span><strong>{{ estatisticas.abertos }}</strong></article>
+  <article class="summary-card"><span class="summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg></span><span>Devoluções hoje</span><strong>{{ estatisticas.devolucoes_hoje }}</strong></article>
+  <article class="summary-card summary-alert"><span class="summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 18H2z"/><path d="M12 9v5M12 17.5v.1"/></svg></span><span>Atrasados</span><strong>{{ estatisticas.atrasados }}</strong></article>
+</div>
+
+<section class="secondary-shelf" id="novidades">
+  <div class="section-title"><div><span class="eyebrow">CHEGARAM AO ACERVO</span><h2>Novidades</h2></div><a class="link-seta" href="{{ url_for('livros', ordem='ano') }}">Ver tudo <span>→</span></a></div>
+  {{ shelf_books(novidades, 'carousel-new') }}
+</section>
+<section class="secondary-shelf" id="mais-emprestados">
+  <div class="section-title"><div><span class="eyebrow">OS FAVORITOS DA COMUNIDADE</span><h2>Mais emprestados</h2></div><a class="link-seta" href="{{ url_for('historico') }}">Ver histórico <span>→</span></a></div>
+  {{ shelf_books(mais_emprestados, 'carousel-borrowed') }}
+</section>
+<section class="secondary-shelf" id="classicos">
+  <div class="section-title"><div><span class="eyebrow">OBRAS QUE ATRAVESSAM O TEMPO</span><h2>Clássicos</h2></div><a class="link-seta" href="{{ url_for('livros', ordem='ano_asc') }}">Ver tudo <span>→</span></a></div>
+  {{ shelf_books(classicos, 'carousel-classics') }}
+</section>
+<section class="secondary-shelf" id="mais-desejados">
+  <div class="section-title"><div><span class="eyebrow">NA FILA DE ESPERA</span><h2>Mais desejados</h2></div><a class="link-seta" href="{{ url_for('reservas') }}">Ver reservas <span>→</span></a></div>
+  {{ shelf_books(mais_desejados, 'carousel-wanted') }}
+</section>
+
+<section class="recent-section">
+  <div class="section-title"><div><span class="eyebrow">ACOMPANHE A BIBLIOTECA</span><h2>Movimentações recentes</h2></div><a class="link-seta" href="{{ url_for('historico') }}">Ver histórico <span>→</span></a></div>
+  {% if recentes %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Livro</th><th>Leitor</th><th>Empréstimo</th><th>Devolução prevista</th><th>Situação</th></tr></thead>
+      <tbody>
+      {% for item in recentes %}
+        <tr>
+          <td><a class="table-book" href="{{ url_for('detalhe_livro', id_livro=item.id_livro) }}">
+            {% if item.capa_url %}<img class="table-cover capa-externa" src="{{ item.capa_url }}" alt="" loading="lazy"><span class="table-cover-placeholder" hidden>{{ item.titulo[:1] }}</span>{% else %}<span class="table-cover-placeholder">{{ item.titulo[:1] }}</span>{% endif %}
+            <strong>{{ item.titulo }}</strong>
+          </a></td>
+          <td>{{ item.nome }}</td>
+          <td>{{ item.data_emprestimo.strftime('%d/%m/%Y') if item.data_emprestimo else '—' }}</td>
+          <td>{{ item.data_prevista.strftime('%d/%m/%Y') if item.data_prevista else '—' }}</td>
+          <td>
+            {% if item.data_devolucao %}<span class="pill pill-returned">Devolvido</span>
+            {% elif item.data_prevista < today %}<span class="pill pill-late">Atrasado</span>
+            {% else %}<span class="pill pill-open">Em aberto</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><span class="empty-icon">◷</span><h2>Nenhuma movimentação ainda</h2><p>Quando houver empréstimos, eles aparecerão nesta lista.</p><a class="botao" href="{{ url_for('emprestimos') }}">Registrar empréstimo</a></div>
+  {% endif %}
+</section>
+{% endblock %}

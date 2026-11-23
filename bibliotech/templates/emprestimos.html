@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Empréstimos · BiblioTech{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div><span class="eyebrow">CIRCULAÇÃO DO ACERVO</span><h1>Empréstimos</h1><p>Registre saídas e acompanhe as devoluções pendentes.</p></div>
+  <a class="botao botao-secondary" href="{{ url_for('historico') }}">Ver histórico</a>
+</section>
+<div class="loans-layout">
+  <section class="panel-section loan-form-panel">
+    <div class="section-title"><div><span class="eyebrow">NOVO REGISTRO</span><h2>Registrar empréstimo</h2></div></div>
+    <form class="formulario" method="post" action="{{ url_for('emprestar') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="campo">Leitor<select name="id_usuario" required><option value="">Selecione o leitor</option>{% for u in usuarios %}<option value="{{ u.id_usuario }}">{{ u.nome }}</option>{% endfor %}</select></label>
+      <label class="campo">Exemplar disponível<select name="id_exemplar" required><option value="">Selecione o livro</option>{% for e in exemplares %}<option value="{{ e.id_exemplar }}" {{ 'selected' if request.args.get('id_livro', type=int) == e.id_livro }}> {{ e.titulo }} · exemplar {{ e.id_exemplar }}</option>{% endfor %}</select></label>
+      <p class="form-hint">Prazo para devolução: <strong>{{ prazo }} dias</strong>.</p>
+      {% if not usuarios %}<p class="form-hint">Cadastre um leitor antes de registrar o empréstimo.</p>{% endif %}
+      <button class="botao botao-wide" type="submit" {{ 'disabled' if not usuarios or not exemplares }}>Registrar empréstimo</button>
+    </form>
+  </section>
+
+  <section class="panel-section" id="emprestimos-pendentes">
+    <div class="section-title"><div><span class="eyebrow">EM ANDAMENTO</span><h2>Empréstimos ativos <span class="count">{{ abertos|length }}</span></h2></div></div>
+    {% if abertos %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Livro</th><th>Leitor</th><th>Data limite</th><th>Situação</th><th>Ação</th></tr></thead>
+        <tbody>
+        {% for a in abertos %}
+        <tr>
+          <td><span class="table-book"><strong>{{ a.titulo }}</strong></span></td>
+          <td>{{ a.nome }}</td>
+          <td>{{ a.data_prevista.strftime('%d/%m/%Y') if a.data_prevista else '—' }}</td>
+          <td>{% if a.atrasado %}<span class="pill pill-late">{{ a.dias_atraso }} dia(s) em atraso</span>{% else %}<span class="pill pill-open">Em aberto</span>{% endif %}</td>
+          <td><form method="post" action="{{ url_for('devolver', id_emprestimo=a.id_emprestimo) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="botao botao-secondary botao-small" type="submit">Registrar devolução</button></form></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><span class="empty-icon">✓</span><h2>Tudo em dia</h2><p>Não há empréstimos pendentes no momento.</p></div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

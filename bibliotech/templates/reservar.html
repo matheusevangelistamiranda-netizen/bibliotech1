@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Reservar {{ livro.titulo }} · BiblioTech{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div><span class="eyebrow">FILA DE ESPERA</span><h1>Reservar exemplar</h1><p>O livro não tem exemplares disponíveis. Escolha o leitor que entrará na fila.</p></div>
+  <a class="botao botao-secundario" href="{{ url_for('detalhe_livro', id_livro=livro.id_livro) }}">Voltar ao livro</a>
+</section>
+<section class="panel-section panel-form">
+  <div class="reservation-book">
+    {% if livro.capa_url %}<img class="capa-externa" src="{{ livro.capa_url }}" alt="Capa de {{ livro.titulo }}"><div class="cover-placeholder" hidden>{{ livro.titulo }}</div>{% else %}<div class="cover-placeholder">{{ livro.titulo }}</div>{% endif %}
+    <div><span class="eyebrow">{{ livro.categoria or 'ACERVO' }}</span><h2>{{ livro.titulo }}</h2><p>{{ livro.autores or 'Autor não informado' }}</p><span class="pill pill-waiting">Fila de espera</span></div>
+  </div>
+  <form method="post" class="formulario reserva-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="campo">Leitor<select name="id_usuario" required><option value="">Selecione o leitor</option>{% for u in usuarios %}<option value="{{ u.id_usuario }}">{{ u.nome }}</option>{% endfor %}</select></label>
+    {% if not usuarios %}<p class="ajuda">Cadastre um leitor antes de registrar a reserva.</p>{% endif %}
+    <p class="ajuda">As reservas são atendidas manualmente na ordem de entrada quando um exemplar voltar ao acervo.</p>
+    <div class="form-actions"><a class="botao botao-secundario" href="{{ url_for('livros') }}">Cancelar</a><button class="botao" type="submit" {{ 'disabled' if not usuarios }}>Entrar na fila</button></div>
+  </form>
+</section>
+{% endblock %}

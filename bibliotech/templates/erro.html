@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block title %}Erro {{ codigo }} · BiblioTech{% endblock %}
+{% block page_heading %}Não foi possível concluir{% endblock %}
+{% block content %}<section class="panel-section empty-state"><span class="empty-icon">!</span><h1>Algo deu errado</h1><p>{{ mensagem }}</p><a class="botao" href="{{ url_for('index') }}">Voltar ao painel</a></section>{% endblock %}

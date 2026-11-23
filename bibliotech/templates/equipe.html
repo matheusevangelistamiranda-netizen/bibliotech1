@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Equipe · BiblioTech{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div><span class="eyebrow">ADMINISTRAÇÃO</span><h1>Equipe da biblioteca</h1><p>Crie contas e desative acessos que não são mais necessários.</p></div>
+</section>
+<div class="grid-duas-colunas">
+  <section class="panel-section">
+    <div class="section-title"><div><span class="eyebrow">NOVO ACESSO</span><h2>Cadastrar funcionário</h2></div></div>
+    <form class="formulario" method="post" action="{{ url_for('novo_bibliotecario') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="campo">Nome completo<input name="nome" maxlength="180" required></label>
+      <label class="campo">Nome de usuário<input name="usuario" pattern="[A-Za-z0-9._-]{3,80}" required><small>3–80 caracteres: letras, números, ponto, hífen ou sublinhado.</small></label>
+      <label class="campo">Senha<input type="password" name="senha" minlength="12" autocomplete="new-password" required><small>Use pelo menos 12 caracteres.</small></label>
+      <label class="checkbox-campo"><input type="checkbox" name="administrador" value="1"> Pode gerenciar contas de funcionários</label>
+      <button class="botao" type="submit">Criar conta</button>
+    </form>
+  </section>
+  <section class="panel-section">
+    <div class="section-title"><div><span class="eyebrow">CONTAS ATIVAS E INATIVAS</span><h2>Funcionários</h2></div></div>
+    {% if funcionarios %}
+    <div class="staff-list">
+      {% for f in funcionarios %}
+      <article class="staff-item">
+        <span class="avatar-pessoa">{{ iniciais(f.nome) }}</span>
+        <div class="staff-info"><strong>{{ f.nome }}</strong><span>@{{ f.usuario }}{% if f.administrador %} · Administrador{% endif %}</span></div>
+        <span class="status-texto {{ 'ativo' if f.ativo else 'inativo' }}">{{ 'Ativa' if f.ativo else 'Desativada' }}</span>
+        {% if f.ativo and f.id_bibliotecario != session.get('bibliotecario_id') %}
+        <form method="post" action="{{ url_for('desativar_bibliotecario', id_bibliotecario=f.id_bibliotecario) }}" onsubmit="return confirm('Desativar o acesso de {{ f.nome }}?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="botao-texto perigo" type="submit">Desativar</button>
+        </form>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}<p class="texto-suave">Nenhuma conta foi criada.</p>{% endif %}
+    <p class="ajuda">As senhas são armazenadas como hashes e não podem ser consultadas pela equipe.</p>
+  </section>
+</div>
+{% endblock %}

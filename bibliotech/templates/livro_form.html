@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar livro' if editando else 'Novo livro' }} · BiblioTech{% endblock %}
+{% block page_heading %}{{ 'Editar livro' if editando else 'Cadastrar livro' }}{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div><span class="eyebrow">ACERVO</span><h1>{{ 'Editar livro' if editando else 'Cadastrar livro' }}</h1><p>Preencha as informações da obra e do acervo.</p></div>
+  <a class="botao botao-secondary" href="{{ url_for('livros') }}">Voltar ao catálogo</a>
+</section>
+<section class="panel-section panel-form">
+  <form method="post" class="formulario">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-grid">
+      <label class="campo campo-largo">Título <span>*</span><input name="titulo" value="{{ livro.titulo or '' }}" required maxlength="255" autofocus></label>
+      <label class="campo">Autores <small>Separe vários nomes com vírgula; autores novos serão cadastrados.</small><input name="autores" value="{{ livro.autores or '' }}" placeholder="Ex.: Clarice Lispector, Machado de Assis"></label>
+      <label class="campo">Categoria<input name="categoria" value="{{ livro.categoria or '' }}" maxlength="120" placeholder="Ex.: Literatura brasileira"></label>
+      <label class="campo">ISBN<input name="isbn" value="{{ livro.isbn or '' }}" maxlength="20"></label>
+      <label class="campo">Editora<input name="editora" value="{{ livro.editora or '' }}" maxlength="180"></label>
+      <label class="campo">Ano de publicação<input type="number" name="ano_publicacao" value="{{ livro.ano_publicacao or '' }}" min="1000" max="2100"></label>
+      <label class="campo">Quantidade de exemplares<input type="number" name="total_exemplares" value="{{ livro.total_exemplares if livro.total_exemplares is defined else livro.total if editando else 1 }}" min="0" required><small>Exemplares emprestados não podem ser removidos ao reduzir a quantidade.</small></label>
+      <label class="campo campo-largo">URL da capa (opcional)<input type="url" name="capa_url" value="{{ livro.capa_url or '' }}" maxlength="1000" placeholder="https://..."></label>
+      <label class="campo campo-largo">Descrição / sinopse<textarea name="descricao" rows="5" maxlength="5000">{{ livro.descricao or '' }}</textarea></label>
+    </div>
+    <div class="form-actions"><a class="botao botao-secondary" href="{{ url_for('livros') }}">Cancelar</a><button class="botao" type="submit">{{ 'Salvar alterações' if editando else 'Cadastrar livro' }}</button></div>
+  </form>
+</section>
+{% endblock %}

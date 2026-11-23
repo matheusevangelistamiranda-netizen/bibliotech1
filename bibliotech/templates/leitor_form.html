@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar leitor' if editando else 'Novo leitor' }} · BiblioTech{% endblock %}
+{% block page_heading %}{{ 'Editar leitor' if editando else 'Cadastrar leitor' }}{% endblock %}
+{% block content %}
+<section class="page-heading"><div><span class="eyebrow">COMUNIDADE</span><h1>{{ 'Editar leitor' if editando else 'Cadastrar leitor' }}</h1><p>Informações básicas do leitor.</p></div><a class="botao botao-secondary" href="{{ url_for('leitores') }}">Voltar aos leitores</a></section>
+<section class="panel-section panel-form"><form method="post" class="formulario">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="form-grid">
+    <label class="campo campo-largo">Nome completo <span>*</span><input name="nome" value="{{ leitor.nome or '' }}" required maxlength="180" autofocus></label>
+    <label class="campo">E-mail<input type="email" name="email" value="{{ leitor.email or '' }}" maxlength="254"></label>
+    <label class="campo">Telefone<input type="tel" name="telefone" value="{{ leitor.telefone or '' }}" maxlength="40"></label>
+  </div>
+  <div class="form-actions"><a class="botao botao-secondary" href="{{ url_for('leitores') }}">Cancelar</a><button class="botao" type="submit">{{ 'Salvar alterações' if editando else 'Cadastrar leitor' }}</button></div>
+</form></section>
+{% endblock %}

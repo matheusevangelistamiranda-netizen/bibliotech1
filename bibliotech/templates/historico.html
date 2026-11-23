@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Histórico · BiblioTech{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div><span class="eyebrow">CIRCULAÇÃO DO ACERVO</span><h1>Histórico</h1><p>Consulte empréstimos e devoluções da biblioteca.</p></div>
+</section>
+<section class="panel-section">
+  <form class="history-filters" method="get" action="{{ url_for('historico') }}">
+    <label class="history-search"><span class="sr-only">Buscar por livro ou leitor</span><input type="search" name="q" value="{{ busca }}" placeholder="Buscar por livro ou leitor"></label>
+    <select name="status" aria-label="Filtrar por situação">
+      <option value="">Todas as situações</option><option value="aberto" {{ 'selected' if status == 'aberto' }}>Em aberto</option><option value="atrasado" {{ 'selected' if status == 'atrasado' }}>Atrasados</option><option value="devolvido" {{ 'selected' if status == 'devolvido' }}>Devolvidos</option>
+    </select>
+    <select name="periodo" aria-label="Filtrar por período">
+      <option value="todos" {{ 'selected' if periodo == 'todos' }}>Todo o período</option><option value="30" {{ 'selected' if periodo == '30' }}>Últimos 30 dias</option><option value="90" {{ 'selected' if periodo == '90' }}>Últimos 90 dias</option><option value="365" {{ 'selected' if periodo == '365' }}>Último ano</option>
+    </select>
+    <button class="botao botao-secondary" type="submit">Filtrar</button>
+  </form>
+  {% if movimentacoes %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Livro</th><th>Leitor</th><th>Empréstimo</th><th>Devolução prevista</th><th>Devolução</th><th>Multa</th><th>Situação</th></tr></thead>
+      <tbody>
+      {% for m in movimentacoes %}
+      <tr>
+        <td><a class="table-book" href="{{ url_for('detalhe_livro', id_livro=m.id_livro) }}">
+          {% if m.capa_url %}<img class="table-cover capa-externa" src="{{ m.capa_url }}" alt="" loading="lazy"><span class="table-cover-placeholder" hidden>{{ m.titulo[:1] }}</span>{% else %}<span class="table-cover-placeholder">{{ m.titulo[:1] }}</span>{% endif %}<strong>{{ m.titulo }}</strong>
+        </a></td>
+        <td>{{ m.nome }}</td>
+        <td>{{ m.data_emprestimo.strftime('%d/%m/%Y') if m.data_emprestimo else '—' }}</td>
+        <td>{{ m.data_prevista.strftime('%d/%m/%Y') if m.data_prevista else '—' }}</td>
+        <td>{{ m.data_devolucao.strftime('%d/%m/%Y') if m.data_devolucao else '—' }}</td>
+        <td>R$ {{ '%.2f'|format(m.multa or 0) }}</td>
+        <td>{% if m.atrasado %}<span class="pill pill-late">Atrasado</span>{% elif m.aberto %}<span class="pill pill-open">Em aberto</span>{% else %}<span class="pill pill-returned">Devolvido</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><span class="empty-icon">◷</span><h2>Nenhuma movimentação encontrada</h2><p>Ajuste os filtros ou registre um novo empréstimo.</p><a class="botao" href="{{ url_for('emprestimos') }}">Novo empréstimo</a></div>
+  {% endif %}
+</section>
+{% endblock %}
